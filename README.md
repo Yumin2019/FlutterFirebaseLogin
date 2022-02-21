@@ -12,3 +12,7 @@
 9. You can get context of App by passing context in function for Provider 
 10. Or just use consumer Widget
 11. Dart language is different to Java so much
+
+
+# issues 
+null-safety: https://dart.dev/null-safety/migration-guide
