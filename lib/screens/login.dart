@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:untitled1/data/JoinOrLogin.dart';
 import 'package:untitled1/util/login_background.dart';
+import 'package:provider/provider.dart';
 
 class AuthPage extends StatelessWidget {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -16,7 +18,8 @@ class AuthPage extends StatelessWidget {
         children: <Widget>[
           CustomPaint(
             size: size,
-            painter: LoginBackground(),
+            painter: LoginBackground(
+                isJoin: Provider.of<JoinOrLogin>(context).isJoin),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -33,11 +36,22 @@ class AuthPage extends StatelessWidget {
               Container(
                 height: size.height * 0.1,
               ),
-              Center(
-                  child: Text(
-                "Don't have an account? Create one",
-                textAlign: TextAlign.center,
-              )),
+              Consumer<JoinOrLogin>(
+                builder: (context, value, child) => GestureDetector(
+                  onTap: () {
+                    value.toggle();
+                  },
+                  child: Center(
+                      child: Text(
+                    value.isJoin
+                        ? "Already have an account, sign in"
+                        : "Don't have an account? Create one",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: value.isJoin ? Colors.red : Colors.blue),
+                  )),
+                ),
+              ),
               Container(
                 height: size.height * 0.05,
               ),
@@ -54,26 +68,27 @@ class AuthPage extends StatelessWidget {
       right: size.width * 0.15,
       bottom: 0,
       child: SizedBox(
-        height: 50,
-        child: ElevatedButton(
-          onPressed: () {
-            if (_formKey.currentState!.validate()) {
-              // 2개의 validator에 대한 처리를 진행
-              print(_emailController.text);
-              print(_passwordController.text);
-            }
-          },
-          child: Text(
-            "Login",
-            style: TextStyle(color: Colors.white, fontSize: 22),
-          ),
-          style: ElevatedButton.styleFrom(
-            primary: Colors.blue,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-          ),
-        ),
-      ),
+          height: 50,
+          child: Consumer<JoinOrLogin>(
+            builder: (context, value, child) => ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  // 2개의 validator에 대한 처리를 진행
+                  print(_emailController.text);
+                  print(_passwordController.text);
+                }
+              },
+              child: Text(
+                value.isJoin ? "Join" : "Login",
+                style: TextStyle(color: Colors.white, fontSize: 22),
+              ),
+              style: ElevatedButton.styleFrom(
+                primary: value.isJoin ? Colors.red : Colors.blue,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25)),
+              ),
+            ),
+          )),
     );
   }
 
@@ -84,8 +99,7 @@ class AuthPage extends StatelessWidget {
       child: FittedBox(
         fit: BoxFit.contain,
         child: CircleAvatar(
-          backgroundImage: NetworkImage(
-              "https://firstclasse.com.my/wp-content/uploads/2021/06/fetchimage.jpg"),
+          backgroundImage: AssetImage("assets/doge.jpg"),
         ),
       ),
     ));
@@ -135,12 +149,17 @@ class AuthPage extends StatelessWidget {
                     Container(
                       height: 8,
                     ),
-                    Center(
-                      child: Text(
-                        "Forgot Password",
-                        textAlign: TextAlign.center,
+                    Consumer<JoinOrLogin>(
+                      builder: (context, value, child) => Opacity(
+                        opacity: value.isJoin ? 0 : 1,
+                        child: Center(
+                          child: Text(
+                            "Forgot Password",
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
                       ),
-                    ),
+                    )
                   ])),
         ),
       ),
