@@ -1,7 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/data/JoinOrLogin.dart';
 import 'package:untitled1/util/login_background.dart';
 import 'package:provider/provider.dart';
+
+import 'forgot_password.dart';
 
 class AuthPage extends StatelessWidget {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -73,9 +76,11 @@ class AuthPage extends StatelessWidget {
             builder: (context, value, child) => ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  // 2개의 validator에 대한 처리를 진행
+                  // check two validators
                   print(_emailController.text);
                   print(_passwordController.text);
+
+                  value.isJoin ? _register(context) : _login(context);
                 }
               },
               child: Text(
@@ -90,6 +95,32 @@ class AuthPage extends StatelessWidget {
             ),
           )),
     );
+  }
+
+  void _register(BuildContext context) async {
+    final result = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text, password: _passwordController.text);
+    final user = result.user;
+
+    if (user == null) {
+      final snackBar = SnackBar(
+        content: Text("Please try again later"),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
+  }
+
+  void _login(BuildContext context) async {
+    final result = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: _emailController.text, password: _passwordController.text);
+    final user = result.user;
+
+    if (user == null) {
+      final snackBar = SnackBar(
+        content: Text("Please try again later"),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
   }
 
   Widget _loadImage() {
@@ -152,10 +183,14 @@ class AuthPage extends StatelessWidget {
                     Consumer<JoinOrLogin>(
                       builder: (context, value, child) => Opacity(
                         opacity: value.isJoin ? 0 : 1,
-                        child: Center(
-                          child: Text(
-                            "Forgot Password",
-                            textAlign: TextAlign.center,
+                        child: GestureDetector( onTap: value.isJoin ? null : () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => ForgotPassword()));
+                        },
+                          child: Center(
+                            child: Text(
+                              "Forgot Password",
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
                       ),
